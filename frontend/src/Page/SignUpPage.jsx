@@ -70,32 +70,32 @@ const SignUpPage = () => {
     }
 
     return (
-        <div className="flex items-center justify-center min-h-screen bg-black">
+        <div className="flex items-center justify-center h-screen bg-black">
             <Card className="border-none shadow-lg shadow-zinc-500/10 bg-zinc-800 max-w-md">
-                <CardHeader className="flex justify-center items-center space-y-3">
+                <CardHeader className="flex justify-center items-center ">
                     <FaUserCircle className="text-white text-7xl" />
-                    <CardTitle className="text-white text-4xl font-bold">Sign Up</CardTitle>
-                    <CardDescription className="text-xl text-white">Create a new account to get started</CardDescription>
+                    <CardTitle className="text-white text-3xl font-bold">Sign Up</CardTitle>
+                    <CardDescription className="text-lg text-white">Create a new account to get started</CardDescription>
                 </CardHeader>
                 <form onSubmit={submitHandler}>
-                    <CardContent className="space-y-3">
+                    <CardContent className="space-y-2">
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <Label htmlFor="firstname" className="font-md text-lg text-white">First Name</Label>
-                                <Input onChange={firstNameHandler} type="text" id="firstname" name="firstname" required className="h-15 text-xl font-md bg-zinc-400" />
+                                <Label htmlFor="firstname" className="font-sm text-md text-white">First Name</Label>
+                                <Input onChange={firstNameHandler} type="text" id="firstname" name="firstname" required className="h-10 text-lg font-md bg-zinc-400" />
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="lastname" className="font-md text-lg text-white">Last Name</Label>
-                                <Input onChange={lastNameHandler} className="text-xl h-15 font-md bg-zinc-400" type="text" id="lastname" name="lastname" required />
+                                <Label htmlFor="lastname" className="font-sm text-md text-white">Last Name</Label>
+                                <Input onChange={lastNameHandler} className="text-lg h-10 font-md bg-zinc-400" type="text" id="lastname" name="lastname" required />
                             </div>
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="username" className="text-white text-lg font-md">Username</Label>
-                            <Input onChange={usernameHandler} className="text-xl h-15 font-md bg-zinc-400" type="text" id="username" name="username" required />
+                            <Label htmlFor="username" className="text-white text-md font-md">Username</Label>
+                            <Input onChange={usernameHandler} className="text-xl h-10 font-md bg-zinc-400" type="text" id="username" name="username" required />
                         </div>
                         <div className="relative space-y-2">
-                            <Label htmlFor="password" className="text-white text-lg font-md">Password</Label>
-                            <Input onChange={passwordHandler} className="h-15 text-xl font-md bg-zinc-400" type={showPassword ? "text" : "password"} id="password" name="password" required />
+                            <Label htmlFor="password" className="text-white text-md font-md">Password</Label>
+                            <Input onChange={passwordHandler} className="h-10 text-xl font-md bg-zinc-400" type={showPassword ? "text" : "password"} id="password" name="password" required />
                             <button type="button" onClick={togglePassword} className="absolute inset-y-0 right-0 flex items-center pr-4 pt-7">
                                 {showPassword ? (
                                     <IoEyeOffSharp className="text-black text-xl" />
@@ -105,16 +105,16 @@ const SignUpPage = () => {
                             </button>
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="email" className="text-white text-lg font-md">Email</Label>
-                            <Input onChange={emailHandler} className="h-15 text-xl font-md bg-zinc-400" type="email" id="email" name="email" required />
+                            <Label htmlFor="email" className="text-white text-md font-md">Email</Label>
+                            <Input onChange={emailHandler} className="h-10 text-xl font-md bg-zinc-400" type="email" id="email" name="email" required />
                         </div>
                         
                     </CardContent>
 
-                    <CardFooter className="flex flex-col space-y-4">
+                    <CardFooter className="flex flex-col space-y-1">
                         <Button
                             type="submit"
-                            className="bg-gradient-to-r from-blue-500 to-slate-700 w-full text-2xl font-bold pb-3 h-15 hover:bg-gradient-to-r hover:from-blue-600 hover:to-slate-800 transition duration-300"
+                            className="bg-gradient-to-r from-blue-500 to-slate-700 w-full text-2xl font-bold pb-3 h-10 hover:bg-gradient-to-r hover:from-blue-600 hover:to-slate-800 transition duration-300"
                         >
                             Sign Up
                         </Button>

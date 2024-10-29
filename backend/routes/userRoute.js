@@ -98,6 +98,7 @@ router.post('/signin', async (req, res) => {
 });
 
 // Password reset request route
+// Send Password Reset Link
 router.post('/password-reset/request', async (req, res) => {
     const { email } = req.body;
     if (!email) {
@@ -110,14 +111,10 @@ router.post('/password-reset/request', async (req, res) => {
             return res.status(400).json({ message: 'Invalid email' });
         }
 
-        const resetToken = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '1h' });
-        await User.findOneAndUpdate(
-            { _id: user._id },
-            { resetToken, resetTokenExpires: Date.now() + 3600000 }, // 1 hour
-            { new: true }
-        );
+        // Include user ID in reset link
+        const resetLink = `http://localhost:5173/reset-password/${user._id}`;
 
-        // Setup Nodemailer transport
+        // Nodemailer setup for sending the email
         const transporter = nodemailer.createTransport({
             service: 'gmail',
             auth: {
@@ -126,113 +123,47 @@ router.post('/password-reset/request', async (req, res) => {
             }
         });
 
-        console.log("call reach here")
-
         const mailOptions = {
             from: process.env.EMAIL,
             to: user.email,
             subject: 'Password Reset Request',
-            html: `
-                <h1>Password Reset Request</h1>
-                <p>Click <a href="http://127.0.0.1:5173/reset-password/${resetToken}">here</a> to reset your password</p>
-                <p>${resetToken}</p>
-                <p>If you did not request this, please ignore this email.</p>
-            `
-            // <p>Your reset token is: <strong>${resetToken}</strong></p>
+            html: `<p>Click <a href="${resetLink}">here</a> to reset your password.</p>`
         };
 
-        // const testMailOptions = {
-        //     from: process.env.EMAIL,
-        //     to: "stormnova04@gmail.com",
-        //     subject: 'Password Reset Request',
-        //     text: "This is a test email from nodemailer"
-        // }
-
-        // await transporter.sendMail(testMailOptions);
-        // console.log("Email sent successfully!");
-
-        // res.status(200).json({ message: 'Password reset link sent successfully' });
-
-        try{
-            await transporter.sendMail(mailOptions);
-            console.log("Email sent successfully!",user.email);
-            res.status(200).json({ message: 'Password reset link sent successfully' });
-        } catch (err) {
-            console.error('Error sending email:', err);
-            return res.status(500).json({ message: 'Failed to send mail' });
-        }
-            
-
-
+        await transporter.sendMail(mailOptions);
+        res.status(200).json({ message: 'Password reset link sent successfully' });
     } catch (err) {
         console.error('Error sending email:', err);
-        return res.status(500).json({ message: 'Internal server error' });
+        res.status(500).json({ message: 'Failed to send email' });
     }
 });
 
-// Password reset verification route
-router.post('/password-reset/verify ', async (req, res) => {
-    const resetToken  = req.cookies.token;
+// Update Password (Directly)
+router.post('/password-reset/update/:userId', async (req, res) => {
+    const { userId } = req.params;
+    const { newPassword } = req.body;
 
-    console.log(resetToken);
-
-    try {
-        if (!resetToken) {
-            return res.status(400).json({ message: 'No reset token found in cookies' });
-        }
-
-
-        const decoded = jwt.verify(resetToken, JWT_SECRET);
-        const userId = decoded.userId;
-        console.log(userId);
-        const user = await User.findOne({ _id: userId });
-        if (!user || user.resetTokenExpires < Date.now()) {
-            return res.status(400).json({ message: 'Invalid or expired reset token' });
-        }
-        console.log(user);
-        res.status(200).json({ message: 'Token is valid' });
-    } catch (err) {
-        console.error(err);
-        return res.status(500).json({ message: 'Internal server error' });
-    }
-});
-
-// Password update route
-router.post('/password-reset/update', async (req, res) => {
-    const {  newPassword } = req.body;
-    const resetToken = req.cookies.token;
-   
     if (!newPassword || newPassword.length < 6) {
         return res.status(400).json({ message: 'New password must be at least 6 characters long' });
     }
-    console.log(newPassword);
-    // console.log(token);
-    try {
-        if (!resetToken) {
-            return res.status(400).json({ message: 'No reset token found in cookies' });
-        }
-        const decoded = jwt.verify(resetToken, JWT_SECRET);
-        const userId = decoded.userId;
 
-        const user = await User.findOne({ _id: userId });
-        if (!user || user.resetTokenExpires < Date.now()) {
-            return res.status(400).json({ message: 'Invalid or expired reset token' });
+    try {
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(400).json({ message: 'User not found' });
         }
+
+        // Hash new password and update user record
         const hashedPassword = await bcrypt.hash(newPassword, 10);
         user.password = hashedPassword;
-        user.resetToken = null;
-        user.resetTokenExpires = null;
         await user.save();
-
-        console.log(newPassword);
-        console.log(token);
-        console.log(user);
 
         res.status(200).json({ message: 'Password updated successfully' });
     } catch (err) {
-        console.error(err);
-        return res.status(500).json({ message: 'Internal server error' });
+        console.error('Error updating password:', err);
+        res.status(500).json({ message: 'Internal server error' });
     }
 });
 
 module.exports = router;
+

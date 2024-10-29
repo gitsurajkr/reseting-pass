@@ -36,9 +36,9 @@ const ForgotPassword = () => {
 
     return (
         <div className="flex items-center justify-center min-h-screen bg-black p-4">
-            <Card className="border-none shadow-lg shadow-zinc-500/10 bg-zinc-800 max-w-lg w-full p-6 rounded-lg ">
-                <CardHeader className="space-y-3">
-                    <CardTitle className="text-white text-4xl font-bold">
+            <Card className="border-none shadow-lg shadow-zinc-500/10 bg-zinc-800 max-w-md  p-6 rounded-lg ">
+                <CardHeader className="space-y-2">
+                    <CardTitle className="text-white text-3xl font-bold">
                         Forgot Password
                     </CardTitle>
                     <CardDescription className="text-zinc-300 text-lg">
