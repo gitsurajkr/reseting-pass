@@ -172,8 +172,41 @@ router.post('/password-reset/request', async (req, res) => {
 
 // Password reset verification route
 router.post('/password-reset/verify ', async (req, res) => {
-    const { resetToken } = req.cookies.token;
+    const resetToken  = req.cookies.token;
 
+    console.log(resetToken);
+
+    try {
+        if (!resetToken) {
+            return res.status(400).json({ message: 'No reset token found in cookies' });
+        }
+
+
+        const decoded = jwt.verify(resetToken, JWT_SECRET);
+        const userId = decoded.userId;
+        console.log(userId);
+        const user = await User.findOne({ _id: userId });
+        if (!user || user.resetTokenExpires < Date.now()) {
+            return res.status(400).json({ message: 'Invalid or expired reset token' });
+        }
+        console.log(user);
+        res.status(200).json({ message: 'Token is valid' });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
+// Password update route
+router.post('/password-reset/update', async (req, res) => {
+    const {  newPassword } = req.body;
+    const resetToken = req.cookies.token;
+   
+    if (!newPassword || newPassword.length < 6) {
+        return res.status(400).json({ message: 'New password must be at least 6 characters long' });
+    }
+    console.log(newPassword);
+    // console.log(token);
     try {
         if (!resetToken) {
             return res.status(400).json({ message: 'No reset token found in cookies' });
@@ -185,40 +218,15 @@ router.post('/password-reset/verify ', async (req, res) => {
         if (!user || user.resetTokenExpires < Date.now()) {
             return res.status(400).json({ message: 'Invalid or expired reset token' });
         }
-
-        res.status(200).json({ message: 'Token is valid' });
-    } catch (err) {
-        console.error(err);
-        return res.status(500).json({ message: 'Internal server error' });
-    }
-});
-
-// Password update route
-router.post('/password-reset/update', async (req, res) => {
-    const {  newPassword } = req.body;
-    const token = req.cookies.token;
-
-    if (!newPassword || newPassword.length < 6) {
-        return res.status(400).json({ message: 'New password must be at least 6 characters long' });
-    }
-
-    try {
-        if (!token) {
-            return res.status(400).json({ message: 'No reset token found in cookies' });
-        }
-        const decoded = jwt.verify(token, JWT_SECRET);
-        const userId = decoded.userId;
-
-        const user = await User.findOne({ _id: userId });
-        if (!user || user.resetTokenExpires < Date.now()) {
-            return res.status(400).json({ message: 'Invalid or expired reset token' });
-        }
-
         const hashedPassword = await bcrypt.hash(newPassword, 10);
         user.password = hashedPassword;
         user.resetToken = null;
         user.resetTokenExpires = null;
         await user.save();
+
+        console.log(newPassword);
+        console.log(token);
+        console.log(user);
 
         res.status(200).json({ message: 'Password updated successfully' });
     } catch (err) {

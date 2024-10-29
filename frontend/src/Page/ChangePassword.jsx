@@ -10,11 +10,11 @@ import { useParams } from "react-router-dom";
 
 const ChangePassword = () => {
     const { token } = useParams(); // Extract the token from the URL parameters
-    const [showPassword, setShowPassword] = useState(false);
-    const [isTokenValid, setIsTokenValid] = useState(false);
-    const [error, setError] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
+    const [isTokenValid, setIsTokenValid] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
+    const [error, setError] = useState(null);
 
     const togglePassword = () => {
         setShowPassword(!showPassword);
@@ -27,7 +27,11 @@ const ChangePassword = () => {
                 return;
             }
             try {
-                await axios.post('http://localhost:3737/reset-password/verify', { resetToken: token });
+                await axios.post(
+                    'http://localhost:3737/api/v1/user/password-reset/verify', 
+                    { resetToken: token },
+                    { withCredentials: true }
+                );
                 setIsTokenValid(true);
             } catch (error) {
                 setError('Token verification failed: ' + (error.response?.data?.message || error.message));
@@ -47,14 +51,17 @@ const ChangePassword = () => {
             setError('New password must be at least 6 characters long');
             return;
         }
-
         if (newPassword !== confirmPassword) {
             setError('Passwords do not match');
             return;
         }
 
         try {
-            await axios.post('http://localhost:3737/reset-password/update', { token, newPassword });
+            await axios.post(
+                'http://localhost:3737/api/v1/user/password-reset/update', 
+                { newPassword },
+                { withCredentials: true }
+            );
             setNewPassword('');
             setConfirmPassword('');
             alert('Password updated successfully!');
@@ -72,6 +79,7 @@ const ChangePassword = () => {
                         Update your password to keep your account secure.
                     </CardDescription>
                 </CardHeader>
+                
                 <form onSubmit={handlePasswordChange}>
                     <CardContent className="space-y-6">
                         <div className="relative">
@@ -117,6 +125,7 @@ const ChangePassword = () => {
                         </Button>
                     </CardContent>
                 </form>
+                
             </Card>
         </div>
     );
